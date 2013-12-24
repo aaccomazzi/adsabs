@@ -82,7 +82,7 @@ class AppConfig(object):
 
     # this operator wraps the user query if sort by relevance is selected
     # and no additional operators are used
-    SOLR_RELEVANCE_WRAPPER = 'classic_relevance'
+    SOLR_RELEVANCE_FUNCTION = 'classic_relevance(%s,0.4)'
     
     SEARCH_DEFAULT_ROWS = 20
 #    SEARCH_DEFAULT_SORT = 'RELEVANCE'
