@@ -140,7 +140,7 @@ def bigquery():
     # reformat query value to handle the following separators between identifiers:
     #     '\s+', ', ', '; '
     # and make sure the data has proper header
-    v = re.sub(r'\s+', r'\n', v.strip().replace(',',' ').replace(';',' '))
+    v = re.sub(r'\s+', r'\n', v.strip().replace(',',' ').replace(';',' ')).strip()
     if v[0:7] != 'bibcode':
         v = 'bibcode\n' + v
     
