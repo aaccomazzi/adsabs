@@ -134,21 +134,29 @@ class QueryBuilderSearch(object):
         # grab sort parameters here since we use them throughout
         sort_type = request_values.get('re_sort_type')
         sort_dir = request_values.get('re_sort_dir')
-        if sort_type is None:
-            sort_type = config.SEARCH_DEFAULT_SORT
 
-        #one box query
+        # one box query
         search_components['ui_q'] = form.q.data
         search_components['hl.q'] = generate_highlight_query(form.q.data)
         search_components['q'] = u'(%s)' % form.q.data
+
+        # if no resorting has been specified, then we default to RELEVANCE for
+        # 2nd order queries, or the system-wide defaults otherwise
+        if sort_type is None:
+            if re.match(r'^\w+\(', form.q.data):
+                sort_type = 'RELEVANCE'
+                sort_dir = 'desc'
+            else:
+                sort_type = config.SEARCH_DEFAULT_SORT
 
         # see if we need to wrap the input query with an operator
         # we do this only if the search is by relevance, no other 
         # operator has been selected by the user, and a default relevance
         # wrapper has been configured
-        if sort_type == 'RELEVANCE' and re.match(r'^\w+\(', form.q.data) is None and config.SOLR_RELEVANCE_WRAPPER:
-            search_components['q'] = u'%s(%s)' % (config.SOLR_RELEVANCE_WRAPPER, form.q.data)
-          
+        if sort_type == 'RELEVANCE' and re.match(r'^\w+\(', form.q.data) is None and config.SOLR_RELEVANCE_FUNCTION:
+            # escape commas since the wrapper is a multi-argument function
+            search_components['q'] = config.SOLR_RELEVANCE_FUNCTION % re.sub(r',', r'\,', form.q.data)
+
         #date range
         if form.year_from.data or form.year_to.data:
             mindate = '0001-00-00' #'*' the * has a bug
